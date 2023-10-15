@@ -1,0 +1,139 @@
+using System;
+
+class Converter
+{
+    private decimal usdToUah;
+    private decimal eurToUah;
+
+    public Converter(decimal usdRate, decimal eurRate)
+    {
+        usdToUah = usdRate;
+        eurToUah = eurRate;
+    }
+
+    public decimal ConvertToUSD(decimal uahAmount)
+    {
+        return uahAmount / usdToUah;
+    }
+
+    public decimal ConvertToEUR(decimal uahAmount)
+    {
+        return uahAmount / eurToUah;
+    }
+
+    public decimal ConvertFromUSD(decimal usdAmount)
+    {
+        return usdAmount * usdToUah;
+    }
+
+    public decimal ConvertFromEUR(decimal eurAmount)
+    {
+        return eurAmount * eurToUah;
+    }
+}
+
+class Program
+{
+static bool ValidateInput(decimal input)
+    {
+        if (input >= 0)
+        {
+            return true;
+        }
+        else
+        {
+            
+            return false;
+        }
+    }
+    static void Main(string[] args)
+    {
+        decimal usdRate;
+        decimal eurRate;
+
+        Console.Write("Input exchange rate of dollar to the hryvnia: ");
+        while (!decimal.TryParse(Console.ReadLine(), out usdRate) || !ValidateInput(usdRate))
+        {
+            Console.WriteLine("Input correct data (positive numbers).");
+            Console.Write("Input exchange rate of dollar to the hryvnia: ");
+        }
+
+        Console.Write("Input exchange rate of euro to the hryvnia: ");
+        while (!decimal.TryParse(Console.ReadLine(), out eurRate) || !ValidateInput(eurRate))
+        {
+            Console.WriteLine("Input correct data (positive numbers).");
+            Console.Write("Input exchange rate of euro to the hryvnia: ");
+        }
+
+        Converter converter = new Converter(usdRate, eurRate);
+        bool workprocess = true;
+
+        while (workprocess)
+        {
+            Console.WriteLine("What operation do you want?");
+            Console.WriteLine("1. Convert hryvnias to dollars");
+            Console.WriteLine("2. Convert hryvnias to euros");
+            Console.WriteLine("3. Convert dollars to hryvnias");
+            Console.WriteLine("4. Convert euros to hryvnias");
+            Console.WriteLine("5. Exit");
+
+            string choice = Console.ReadLine();
+
+            decimal amountInUAH = 0;
+
+            switch (choice)
+            {
+                case "1":
+                    Console.Write("Input sum in hryvnias: ");
+                    while (!decimal.TryParse(Console.ReadLine(), out amountInUAH) || !ValidateInput(amountInUAH))
+                    {
+                        Console.WriteLine("Input correct data (positive numbers).");
+                        Console.Write("Input sum in hryvnias: ");
+                    }
+
+                    decimal usdResult = converter.ConvertToUSD(amountInUAH);
+                    Console.WriteLine($"{amountInUAH} hryvnias is equal to {usdResult} dollars.");
+                    break;
+                case "2":
+                    Console.Write("Input sum in hryvnias: ");
+                    while (!decimal.TryParse(Console.ReadLine(), out amountInUAH) || !ValidateInput(amountInUAH))
+                    {
+                        Console.WriteLine("Input correct data (positive numbers).");
+                        Console.Write("Input sum in hryvnias: ");
+                    }
+
+                    decimal eurResult = converter.ConvertToEUR(amountInUAH);
+                    Console.WriteLine($"{amountInUAH} hryvnias is equal to {eurResult} euros.");
+                    break;
+                case "3":
+                    Console.Write("Input sum in dollars: ");
+                    while (!decimal.TryParse(Console.ReadLine(), out amountInUAH) || !ValidateInput(amountInUAH))
+                    {
+                        Console.WriteLine("Input correct data (positive numbers).");
+                        Console.Write("Input sum in dollars: ");
+                    }
+
+                    decimal uahResultFromUSD = converter.ConvertFromUSD(amountInUAH);
+                    Console.WriteLine($"{amountInUAH} dollars is equal to {uahResultFromUSD} hryvnias.");
+                    break;
+                case "4":
+                    Console.Write("Input sum in euros: ");
+                    while (!decimal.TryParse(Console.ReadLine(), out amountInUAH) || !ValidateInput(amountInUAH))
+                    {
+                        Console.WriteLine("Input correct data (positive numbers).");
+                        Console.Write("Input sum in euros: ");
+                    }
+
+                    decimal uahResultFromEUR = converter.ConvertFromEUR(amountInUAH);
+                    Console.WriteLine($"{amountInUAH} euros is equal to {uahResultFromEUR} hryvnias.");
+                    break;
+                case "5":
+                    workprocess = false;
+                    break;
+                default:
+                    Console.WriteLine("Wrong choice. Try again.");
+                    break;
+            }
+        }
+    }
+}
