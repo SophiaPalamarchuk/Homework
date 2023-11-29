@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+
+public class PublishingHouse
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Adress { get; set; }
+}
+
+
+
+public class Book
+{
+    
+    [JsonIgnore]
+    public int PublishingHouseId { get; set; }
+    [JsonProperty("Name")]
+    public string Title { get; set; }
+    public PublishingHouse PublishingHouse { get; set; }
+}/*
+public class Book
+{
+    public int PublishingHouseId { get; set; }
+    public string Title { get; set; }
+    public PublishingHouse PublishingHouse { get; set; }
+}
+
+*/
+class Program
+{
+    static void Main()
+    {
+        string json = @"
+        [
+            {
+                ""PublishingHouseId"": 2,
+                ""Title"": ""Algebra"",
+                ""PublishingHouse"": {
+                    ""Id"": 2,
+                    ""Name"": ""Gymnasium"",
+                    ""Adress"": ""Adress2""
+                }
+            },
+            {
+                ""PublishingHouseId"": 1,
+                ""Title"": ""Harry Potter"",
+                ""PublishingHouse"": {
+                    ""Id"": 1,
+                    ""Name"": ""ABBAGLMAGA"",
+                    ""Adress"": ""Adress1""
+                }
+            },
+            {
+                ""PublishingHouseId"": 2,
+                ""Title"": ""English"",
+                ""PublishingHouse"": {
+                    ""Id"": 2,
+                    ""Name"": ""Gymnasium"",
+                    ""Adress"": ""Adress2""
+                }
+            }
+        ]";
+
+        List<Book> books = JsonConvert.DeserializeObject<List<Book>>(json);
+
+        // Тепер ви можете використовувати список книг (books) в своїй програмі
+        foreach (var book in books)
+        {
+            Console.WriteLine($"PublishingHouseId: {book.PublishingHouseId}");
+            Console.WriteLine($"Title: {book.Title}");
+            Console.WriteLine($"Publishing House Id: {book.PublishingHouse.Id}");
+            Console.WriteLine($"Publishing House Name: {book.PublishingHouse.Name}");
+            Console.WriteLine($"Publishing House Address: {book.PublishingHouse.Adress}");
+            Console.WriteLine();
+        }
+    }
+}
