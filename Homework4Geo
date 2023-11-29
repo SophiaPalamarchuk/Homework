@@ -1,0 +1,161 @@
+//With interface 
+using System;
+
+// Інтерфейс "Географічний об'єкт"
+public interface IGeographicObject
+{
+    double X { get; set; }
+    double Y { get; set; }
+    string Name { get; set; }
+    string Description { get; set; }
+
+    void GetInfo();
+}
+
+public class River : IGeographicObject
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public double FlowSpeed { get; set; }
+    public double TotalLength { get; set; }
+
+    public void GetInfo()
+    {
+        Console.WriteLine($"Name: {Name}");
+        Console.WriteLine($"Coordinates (X, Y): ({X}, {Y})");
+        Console.WriteLine($"Description: {Description}");
+        Console.WriteLine($"Flow speed: {FlowSpeed} cm/s");
+        Console.WriteLine($"Total length: {TotalLength} cm");
+    }
+}
+
+public class Mountain : IGeographicObject
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public double HighestPoint { get; set; }
+
+    public void GetInfo()
+    {
+        Console.WriteLine($"Name: {Name}");
+        Console.WriteLine($"Coordinates (X, Y): ({X}, {Y})");
+        Console.WriteLine($"Description: {Description}");
+        Console.WriteLine($"The highest point: {HighestPoint} m");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        IGeographicObject river = new River
+        {
+            X = 50.123,
+            Y = 30.456,
+            Name = "Dnipro",
+            Description = "Long river in Ukraine",
+            FlowSpeed = 10.5,
+            TotalLength = 2200.7
+        };
+
+        IGeographicObject mountain = new Mountain
+        {
+            X = 40.789,
+            Y = 25.123,
+            Name = "Hoverla",
+            Description = "The highest mountain in Ukraine",
+            HighestPoint = 2061.7
+        };
+
+        Console.WriteLine("Info about river:");
+        river.GetInfo();
+
+        Console.WriteLine("\nInfo about mountain:");
+        mountain.GetInfo();
+    }
+}
+//
+/*
+using System;
+
+// Абстрактний клас "Географічний об'єкт"
+public abstract class GeographicObject
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+
+    // Віртуальний метод для отримання інформації про об'єкт
+    public virtual void GetInfo()
+    {
+        Console.WriteLine($"Name: {Name}");
+        Console.WriteLine($"Coordinates (X, Y): ({X}, {Y})");
+        Console.WriteLine($"Description: {Description}");
+    }
+}
+
+// Клас "Річка" наслідується від "Географічний об'єкт"
+public class River : GeographicObject
+{
+    public double FlowSpeed { get; set; }
+    public double TotalLength { get; set; }
+
+    public override void GetInfo()
+    {
+        base.GetInfo(); // Виклик GetInfo() з базового класу
+        Console.WriteLine($"Flow speed: {FlowSpeed} cm/s");
+        Console.WriteLine($"Total lenght: {TotalLength} cm");
+    }
+}
+
+// Клас "Гора" наслідується від "Географічний об'єкт"
+public class Mountain : GeographicObject
+{
+    public double HighestPoint { get; set; }
+
+    public override void GetInfo()
+    {
+        base.GetInfo(); // Виклик GetInfo() з базового класу
+        Console.WriteLine($"The highest point: {HighestPoint} m");
+    }
+}
+
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Створюємо об'єкти "Річка" та "Гора"
+        River river = new River
+        {
+            X = 50.123,
+            Y = 30.456,
+            Name = "Dnipro",
+            Description = "Long river in Ukraine",
+            FlowSpeed = 10.5,
+            TotalLength = 2200.7
+        };
+
+        Mountain mountain = new Mountain
+        {
+            X = 40.789,
+            Y = 25.123,
+            Name = "Hoverla",
+            Description = "The highest mountain in Ukraine",
+            HighestPoint = 2061.7
+        };
+
+        // Виводимо інформацію про об'єкти
+        Console.WriteLine("Info about river:");
+        river.GetInfo();
+
+        Console.WriteLine("\nInfo about mountain:");
+        mountain.GetInfo();
+    }
+}
+*/
