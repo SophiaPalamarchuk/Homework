@@ -1,0 +1,23 @@
+
+У класі Order порушено принцип інкапсуляції. Атрибут itemList має доступний рівень видимості internal, що означає, що він доступний для інших класів 
+всередині одного проекту. Це може призвести до того, що інші класи будуть мати неконтрольований доступ до елементів списку itemList, що може призвести до збоїв або інших проблем.
+class Order {
+    private List<Item> itemList;
+
+    public List<Item> GetItems() {
+        return itemList;
+    }
+
+    public int GetItemCount() {
+        return itemList.Count;
+    }
+
+    public void AddItem(Item item) {
+        itemList.Add(item);
+    }
+
+    public void DeleteItem(Item item) {
+        itemList.Remove(item);
+    }
+
+
