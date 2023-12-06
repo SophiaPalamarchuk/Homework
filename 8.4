@@ -1,0 +1,53 @@
+using System;
+
+interface IPriceable
+{
+    double Price { get; set; }
+}
+
+interface IDiscountable
+{
+    void ApplyDiscount(string discount);
+}
+
+class Book : IPriceable, IDiscountable
+{
+    public double Price { get; set; }
+
+    public void ApplyDiscount(string discount)
+    {
+        // ...
+    }
+}
+
+class Outerwear : IColorable, ISizeable, IPriceable, IDiscountable
+{
+    public byte Color { get; set; }
+    public byte Size { get; set; }
+    public double Price { get; set; }
+
+    public void ApplyDiscount(string discount)
+    {
+        // ...
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Book book = new Book();
+        book.Price = 100;
+        book.ApplyDiscount("20%");
+        Console.WriteLine(book.Price); // 80
+
+        Outerwear outerwear = new Outerwear();
+        outerwear.Color = 1;
+        outerwear.Size = 2;
+        outerwear.Price = 200;
+        outerwear.ApplyDiscount("10%");
+        Console.WriteLine(outerwear.Price); // 180
+
+        Console.ReadKey();
+    }
+}
