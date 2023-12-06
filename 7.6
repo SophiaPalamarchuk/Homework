@@ -1,0 +1,144 @@
+Створити ієрархію класів для представлення геометричних фігур: коло, прямокутник, трикутник. Використовуйте шаблон Factory Method для створення об'єктів фігур.
+
+using System;
+
+// Базовий клас для геометричних фігур
+abstract class Shape
+{
+    public abstract double Area();
+}
+
+// Клас для представлення кола
+class Circle : Shape
+{
+    private double Radius { get; }
+
+    public Circle(double radius)
+    {
+        Radius = radius;
+    }
+
+    public override double Area()
+    {
+        return Math.PI * Radius * Radius;
+    }
+}
+
+// Клас для представлення прямокутника
+class Rectangle : Shape
+{
+    private double Width { get; }
+    private double Height { get; }
+
+    public Rectangle(double width, double height)
+    {
+        Width = width;
+        Height = height;
+    }
+
+    public override double Area()
+    {
+        return Width * Height;
+    }
+}
+
+// Клас для представлення трикутника
+class Triangle : Shape
+{
+    private double SideA { get; }
+    private double SideB { get; }
+    private double SideC { get; }
+
+    public Triangle(double sideA, double sideB, double sideC)
+    {
+        SideA = sideA;
+        SideB = sideB;
+        SideC = sideC;
+    }
+
+    public override double Area()
+    {
+        // Використовуємо формулу Герона для обчислення площі трикутника
+        double s = (SideA + SideB + SideC) / 2;
+        return Math.Sqrt(s * (s - SideA) * (s - SideB) * (s - SideC));
+    }
+}
+
+// Фабричний метод для створення об'єктів фігур
+abstract class ShapeFactory
+{
+    public abstract Shape CreateShape();
+}
+
+// Фабричний метод для створення об'єкта кола
+class CircleFactory : ShapeFactory
+{
+    private double Radius { get; }
+
+    public CircleFactory(double radius)
+    {
+        Radius = radius;
+    }
+
+    public override Shape CreateShape()
+    {
+        return new Circle(Radius);
+    }
+}
+
+// Фабричний метод для створення об'єкта прямокутника
+class RectangleFactory : ShapeFactory
+{
+    private double Width { get; }
+    private double Height { get; }
+
+    public RectangleFactory(double width, double height)
+    {
+        Width = width;
+        Height = height;
+    }
+
+    public override Shape CreateShape()
+    {
+        return new Rectangle(Width, Height);
+    }
+}
+
+// Фабричний метод для створення об'єкта трикутника
+class TriangleFactory : ShapeFactory
+{
+    private double SideA { get; }
+    private double SideB { get; }
+    private double SideC { get; }
+
+    public TriangleFactory(double sideA, double sideB, double sideC)
+    {
+        SideA = sideA;
+        SideB = sideB;
+        SideC = sideC;
+    }
+
+    public override Shape CreateShape()
+    {
+        return new Triangle(SideA, SideB, SideC);
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // Використання фабричних методів для створення об'єктів фігур
+        ShapeFactory circleFactory = new CircleFactory(5);
+        Shape circle = circleFactory.CreateShape();
+        Console.WriteLine($"Площа кола: {circle.Area()}");
+
+        ShapeFactory rectangleFactory = new RectangleFactory(4, 6);
+        Shape rectangle = rectangleFactory.CreateShape();
+        Console.WriteLine($"Площа прямокутника: {rectangle.Area()}");
+
+        ShapeFactory triangleFactory = new TriangleFactory(3, 4, 5);
+        Shape triangle = triangleFactory.CreateShape();
+        Console.WriteLine($"Площа трикутника: {triangle.Area()}");
+    }
+}
