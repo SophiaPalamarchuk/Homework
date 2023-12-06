@@ -1,0 +1,134 @@
+using System;
+
+public abstract class ChristmasTree
+{
+    protected string _name;
+    protected int _height;
+    protected string _color;
+
+    public ChristmasTree(string name, int height, string color)
+    {
+        this._name = name;
+        this._height = height;
+        this._color = color;
+    }
+
+    public string Name
+    {
+        get { return _name; }
+    }
+
+    public int Height
+    {
+        get { return _height; }
+    }
+
+    public string Color
+    {
+        get { return _color; }
+    }
+
+    public abstract void Decorate();
+}
+
+public abstract class ChristmasTreeDecoration
+{
+    protected ChristmasTree _tree;
+
+    public ChristmasTreeDecoration(ChristmasTree tree)
+    {
+        this._tree = tree;
+    }
+
+    public ChristmasTree Tree
+    {
+        get { return _tree; }
+    }
+
+    public abstract void Decorate();
+}
+
+public class Garland : ChristmasTreeDecoration
+{
+    public Garland(ChristmasTree tree) : base(tree)
+    {
+    }
+
+    public override void Decorate()
+    {
+        _tree.Decorate();
+        Console.WriteLine("Ялинка {0} прикрашена гірляндою", _tree.Name);
+    }
+}
+
+public class ChristmasBalls : ChristmasTreeDecoration
+{
+    public ChristmasBalls(ChristmasTree tree) : base(tree)
+    {
+    }
+
+    public override void Decorate()
+    {
+        _tree.Decorate();
+        Console.WriteLine("Ялинка {0} прикрашена ялинковими кулями", _tree.Name);
+    }
+}
+public class RealChristmasTree : ChristmasTree
+{
+    public RealChristmasTree(string name, int height, string color) : base(name, height, color)
+    {
+    }
+
+    public override void Decorate()
+    {
+        Console.WriteLine("Decorating the tree...");
+    }
+}
+public class Star : ChristmasTreeDecoration
+{
+    public Star(ChristmasTree tree) : base(tree)
+    {
+    }
+    public class RealChristmasTree : ChristmasTree
+{
+    public RealChristmasTree(string name, int height, string color) : base(name, height, color)
+    {
+    }
+
+    public override void Decorate()
+    {
+        Console.WriteLine("Decorating the tree...");
+    }
+}
+    public override void Decorate()
+    {
+        _tree.Decorate();
+        Console.WriteLine("Ялинка {0} прикрашена зіркою", _tree.Name);
+    }
+}
+
+namespace ChristmasTreeDecorator
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            RealChristmasTree tree = new RealChristmasTree("Ошатна ялинка", 200, "зелена");
+
+            // Decorate the tree with Garland
+            ChristmasTreeDecoration garlandDecoration = new Garland(tree);
+            garlandDecoration.Decorate();
+
+            // Decorate the tree with ChristmasBalls
+            ChristmasTreeDecoration ballsDecoration = new ChristmasBalls(garlandDecoration.Tree);
+            ballsDecoration.Decorate();
+
+            // Decorate the tree with Star
+            ChristmasTreeDecoration starDecoration = new Star(ballsDecoration.Tree);
+            starDecoration.Decorate();
+        }
+
+
+
+    }
+}
