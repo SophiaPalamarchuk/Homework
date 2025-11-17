@@ -1,0 +1,47 @@
+name: Lab3 tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('lab3/requirements.txt') }}
+
+      # УВАГА: далі все запускаємо в каталозі lab3
+      - name: Install dependencies
+        working-directory: lab3
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: lab3
+        run: pytest -q | tee output.log
+
+      - name: Upload test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab3-test-log-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: lab3/output.log
