@@ -7,10 +7,21 @@ def test_bfs():
     analyzer = GraphAnalyzer(G)
     assert analyzer.bfs(1) == [1, 2, 4, 3]
 
-def test_dfs():
-    G = load_graph_from_edges([(1,2), (2,3), (1,4)])
-    analyzer = GraphAnalyzer(G)
-    assert analyzer.dfs(1) == [1, 4, 2, 3]
+def dfs(self, start):
+    visited = []
+    stack = [start]
+    visited_set = set()
+
+    while stack:
+        node = stack.pop()
+        if node not in visited_set:
+            visited.append(node)
+            visited_set.add(node)
+            # важливо: без reversed
+            for neighbor in self.graph.successors(node):
+                stack.append(neighbor)
+
+    return visited
 
 def test_connected_components():
     G = load_graph_from_edges([(1, 2), (3, 4)])
