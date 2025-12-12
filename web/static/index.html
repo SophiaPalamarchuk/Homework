@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TabDB Web (Type 1)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; }
+    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+    input, select, button { font: inherit; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .muted { color: #666; font-size: 12px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+    th { background: #f5f5f5; }
+    code { background: #f3f3f3; padding: 1px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h2>TabDB Web (Type 1)</h2>
+  <p class="muted">REST API + простий веб-інтерфейс. Типи: <code>integer</code>, <code>real</code>, <code>char</code>, <code>string</code>, <code>date</code>, <code>dateInvl</code>.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>База даних</h3>
+      <div class="row">
+        <button onclick="newDb()">New DB</button>
+        <button onclick="downloadJson()">Download JSON</button>
+        <label class="muted">Load JSON:
+          <input type="file" id="jsonFile" accept=".json" onchange="loadJson()" />
+        </label>
+      </div>
+      <hr/>
+      <h3>Таблиці</h3>
+      <div class="row">
+        <button onclick="refreshTables()">Refresh</button>
+        <button onclick="createTable()">Create</button>
+        <button onclick="deleteTable()">Delete</button>
+      </div>
+      <p class="muted">Вибери таблицю:</p>
+      <select id="tables" size="10" style="width:100%" onchange="loadTable()"></select>
+
+      <hr/>
+      <h3>Перетин таблиць</h3>
+      <div class="row">
+        <select id="a"></select>
+        <select id="b"></select>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <input id="outName" placeholder="Result table name" value="Intersection" style="flex:1" />
+        <button onclick="intersect()">Intersect</button>
+      </div>
+      <p class="muted">Умови: однакова схема (колонки/типи/порядок).</p>
+    </div>
+
+    <div class="card">
+      <h3 id="tableTitle">Таблиця: (не вибрано)</h3>
+      <div class="row">
+        <button onclick="addRow()">Add row</button>
+        <button onclick="editRow()">Edit selected</button>
+        <button onclick="delRow()">Delete selected</button>
+      </div>
+      <div id="schema" class="muted" style="margin:8px 0"></div>
+      <div style="overflow:auto">
+        <table id="grid">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="muted">Для <code>dateInvl</code> вводь як <code>YYYY-MM-DD..YYYY-MM-DD</code>.</p>
+    </div>
+  </div>
+
+<script>
+const api = (path, opts={}) => fetch(path, {headers: {"Content-Type":"application/json"}, ...opts});
+
+async function newDb(){
+  await api("/db/new", {method:"POST", body: JSON.stringify({name:"Untitled"})});
+  await refreshTables();
+  clearGrid();
+  alert("New DB created");
+}
+
+async function refreshTables(){
+  const r = await api("/tables");
+  const data = await r.json();
+  const sel = document.getElementById("tables");
+  sel.innerHTML = "";
+  for(const t of data.tables){
+    const opt = document.createElement("option");
+    opt.value = t; opt.textContent = t;
+    sel.appendChild(opt);
+  }
+  const a = document.getElementById("a");
+  const b = document.getElementById("b");
+  a.innerHTML = ""; b.innerHTML = "";
+  for(const t of data.tables){
+    const o1 = document.createElement("option"); o1.value=t; o1.textContent=t; a.appendChild(o1);
+    const o2 = document.createElement("option"); o2.value=t; o2.textContent=t; b.appendChild(o2);
+  }
+  if (data.tables.length > 1) b.selectedIndex = 1;
+}
+
+function selectedTable(){
+  const sel = document.getElementById("tables");
+  return sel.value || null;
+}
+
+async function loadTable(){
+  const t = selectedTable();
+  if(!t) return;
+  const r = await api(`/tables/${encodeURIComponent(t)}`);
+  const data = await r.json();
+  renderTable(data);
+}
+
+function clearGrid(){
+  document.getElementById("tableTitle").textContent = "Таблиця: (не вибрано)";
+  document.getElementById("schema").textContent = "";
+  document.querySelector("#grid thead").innerHTML = "";
+  document.querySelector("#grid tbody").innerHTML = "";
+}
+
+function renderTable(t){
+  document.getElementById("tableTitle").textContent = `Таблиця: ${t.name}`;
+  document.getElementById("schema").textContent = "Схема: " + t.columns.map(c => `${c.name}:${c.type}`).join(", ");
+  const thead = document.querySelector("#grid thead");
+  const tbody = document.querySelector("#grid tbody");
+  thead.innerHTML = "";
+  tbody.innerHTML = "";
+  const trh = document.createElement("tr");
+  trh.appendChild(th("#"));
+  for(const c of t.columns) trh.appendChild(th(c.name));
+  thead.appendChild(trh);
+
+  t.rows.forEach((row, idx) => {
+    const tr = document.createElement("tr");
+    tr.dataset.index = idx;
+    tr.onclick = () => {
+      document.querySelectorAll("#grid tbody tr").forEach(x=>x.style.background="");
+      tr.style.background = "#eef6ff";
+      window.__selectedRow = idx;
+    };
+    tr.appendChild(td(String(idx)));
+    row.forEach(v => tr.appendChild(td(Array.isArray(v)? v.join("..") : String(v))));
+    tbody.appendChild(tr);
+  });
+}
+
+function th(x){ const e=document.createElement("th"); e.textContent=x; return e; }
+function td(x){ const e=document.createElement("td"); e.textContent=x; return e; }
+
+async function createTable(){
+  const name = prompt("Table name?");
+  if(!name) return;
+  const cols = [];
+  while(true){
+    const cname = prompt("Column name? (Cancel/empty to finish)");
+    if(!cname) break;
+    const ctype = prompt("Type? integer|real|char|string|date|dateInvl", "string");
+    if(!ctype) break;
+    cols.push({name:cname, type:ctype});
+  }
+  if(cols.length === 0){ alert("Need at least 1 column"); return; }
+  const r = await api("/tables", {method:"POST", body: JSON.stringify({name, columns: cols})});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  await refreshTables();
+  alert("Table created");
+}
+
+async function deleteTable(){
+  const t = selectedTable();
+  if(!t) return alert("Select table");
+  if(!confirm(`Delete table '${t}'?`)) return;
+  const r = await api(`/tables/${encodeURIComponent(t)}`, {method:"DELETE"});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  await refreshTables();
+  clearGrid();
+}
+
+async function addRow(){
+  const t = selectedTable();
+  if(!t) return alert("Select table");
+  const meta = await (await api(`/tables/${encodeURIComponent(t)}`)).json();
+  const values = [];
+  for(const c of meta.columns){
+    const v = prompt(`Value for ${c.name} (${c.type})?`, "");
+    if(v === null) return;
+    values.push(v);
+  }
+  const r = await api(`/tables/${encodeURIComponent(t)}/rows`, {method:"POST", body: JSON.stringify({values})});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  await loadTable();
+}
+
+async function editRow(){
+  const t = selectedTable();
+  if(!t) return alert("Select table");
+  if(window.__selectedRow === undefined) return alert("Select row in grid");
+  const idx = window.__selectedRow;
+  const meta = await (await api(`/tables/${encodeURIComponent(t)}`)).json();
+  const cur = meta.rows[idx];
+  const values = [];
+  for(let i=0;i<meta.columns.length;i++){
+    const c = meta.columns[i];
+    const prev = Array.isArray(cur[i]) ? cur[i].join("..") : String(cur[i]);
+    const v = prompt(`New value for ${c.name} (${c.type})`, prev);
+    if(v === null) return;
+    values.push(v);
+  }
+  const r = await api(`/tables/${encodeURIComponent(t)}/rows/${idx}`, {method:"PUT", body: JSON.stringify({values})});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  await loadTable();
+}
+
+async function delRow(){
+  const t = selectedTable();
+  if(!t) return alert("Select table");
+  if(window.__selectedRow === undefined) return alert("Select row in grid");
+  const idx = window.__selectedRow;
+  if(!confirm(`Delete row #${idx}?`)) return;
+  const r = await api(`/tables/${encodeURIComponent(t)}/rows/${idx}`, {method:"DELETE"});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  window.__selectedRow = undefined;
+  await loadTable();
+}
+
+async function intersect(){
+  const a = document.getElementById("a").value;
+  const b = document.getElementById("b").value;
+  const result_name = document.getElementById("outName").value || "Intersection";
+  const r = await api("/tables/intersect", {method:"POST", body: JSON.stringify({a,b,result_name})});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  await refreshTables();
+  alert("Intersection created: " + result_name);
+}
+
+async function downloadJson(){
+  const r = await fetch("/db/download-json");
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "tabdb.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function loadJson(){
+  const f = document.getElementById("jsonFile").files[0];
+  if(!f) return;
+  const fd = new FormData();
+  fd.append("file", f);
+  const r = await fetch("/db/load-json", {method:"POST", body: fd});
+  if(!r.ok){ alert("Error: " + (await r.text())); return; }
+  await refreshTables();
+  clearGrid();
+  alert("Loaded JSON");
+}
+
+refreshTables();
+</script>
+</body>
+</html>
